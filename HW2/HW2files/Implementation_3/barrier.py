@@ -1,3 +1,6 @@
+#---------------------------------------------------
+# barrier --- Junhao TU/10.3#
+#---------------------------------------------------
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -74,31 +77,30 @@ if __name__ == "__main__":
             #you will also need to compute the second derivative f'' (fprimeprime) in the same way
 
             #compute fprime for just the optimization force first
-            fprime = ###YOUR CODE HERE### 
+            fprime = t * c
             
             #compute fprimeprime for just the optimization force first
-            fprimeprime = ###YOUR CODE HERE### 
+            fprimeprime = np.mat(np.zeros((2, 2)))
 
             #compute the first and second derivatives from each hyperplane and aggregate
             for j in range(0,numplanes):
-                fprime_for_plane_j = ###YOUR CODE HERE###
+                fprime_for_plane_j = a[:, j] / (-a[:, j].T * x + b[j, 0])
+                fprimeprime_for_plane_j = a[:, j] * a[:, j].T / ((-a[:, j].T * x + b[j, 0]) ** 2)
 
-                fprimeprime_for_plane_j = ###YOUR CODE HERE###
-
-                fprime = fprime - fprime_for_plane_j; # put in the contribution of hyperplane j to fprime
+                fprime = fprime + fprime_for_plane_j; # put in the contribution of hyperplane j to fprime
                 fprimeprime = fprimeprime + fprimeprime_for_plane_j; # put in the contribution of hyperplane j to fprimeprime
 
             #you might want to print fprime and fprimeprime here to debug (but it will slow things down)
 
             #the step according to Newton's method (in terms of fprime and fprimeprime)
-            step = ###YOUR CODE HERE###
+            step = -np.linalg.inv(fprimeprime) * fprime
 
             #compute the Newton decrement squared (in terms of step and fprimeprime)
-            lambda2 =  ###YOUR CODE HERE###
+            lambda2 =  fprime.T * np.linalg.inv(fprimeprime) * fprime
 
             #check if we've reached the Newton's method stopping condition
             #if so, break out of Newton's method
-            if(###YOUR CODE HERE###):
+            if lambda2 / 2 <= newton_epsilon:
                 break;
     
             #now we have a direction to move the point x (i.e. the Newton step) but we don't 
@@ -112,7 +114,7 @@ if __name__ == "__main__":
             k = 1; #this is how much to scale the step, start with the original magnitude
             f = t*c.T*x;
             for j in range(0,numplanes):
-                f = f - np.log(-a[:,j].T*x + b[j]);
+                 f = f - np.log(-a[:, j].T * x + b[j, 0])
 
             while 1:
                 xnew = x + k*step;
@@ -120,16 +122,16 @@ if __name__ == "__main__":
                 pastboundary = 0;
                 #check if we've jumped over a boundary
                 for j in range(0,numplanes):
-                    dist = -a[:,j].T*xnew + b[j];
+                    dist = -a[:,j].T*xnew + b[j,0];
                     if (dist < 0):
                         pastboundary = 1;
                         break;
                     fnew = fnew - np.log(dist);
 
                 #use alpha and beta to generate new guess for how much to move along the step direction
-                if(pastboundary or ###YOUR CODE HERE###):  #put in the check for terminating backtracking line search
+                if pastboundary or fnew> f+ alpha * k * fprime.T * step:
                     #if we're not done
-                    k = ###YOUR CODE HERE###
+                    k = beta * k
                 else:
                     break;
             
@@ -146,7 +148,7 @@ if __name__ == "__main__":
 
 
         #compute the duality gap (in terms of numplanes and t)
-        duality_gap = ###YOUR CODE HERE###
+        duality_gap = numplanes / t
 
         #If the duality gap is below our error tolerance (epsilon), we're done!
         if duality_gap < epsilon:
@@ -154,7 +156,7 @@ if __name__ == "__main__":
     
         #now that we've figured out the optimal point for this amount of optimization "force," increase the optimization force to a larger value
         #compute the new optimization force magnitude
-        t = ###YOUR CODE HERE###
+        t = mu * t
 
     ###############End outer loop (Barrier Method)#####################
 

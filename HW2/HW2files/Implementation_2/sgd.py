@@ -23,7 +23,6 @@ def sgd(x0, maxi, grad_f, t, iteration_limit):
     x = x0
     history = [x]
 
- 
     for _ in range(iteration_limit):
         i = random.randint(0, maxi-1)
         delta_xi = -grad_f(x, i)
