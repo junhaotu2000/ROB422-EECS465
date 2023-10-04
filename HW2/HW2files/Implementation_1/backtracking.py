@@ -1,7 +1,6 @@
 #---------------------------------------------------
 # backtracking line search (BLS) --- Junhao TU/10.3#
 #---------------------------------------------------
-import numpy as np
 
 def bls(f, x, grad_f, delta_x, alpha = 0.1, beta = 0.6):
     """
