@@ -146,9 +146,10 @@ def linearize_dynamics_numerically(x_r, u_r, h, true_dynamics):
 
     #Implement Newton's difference quotient using h
     #### YOUR CODE HERE ####
-
-
-
+    for i in range(n):
+        xu_r_perturbed = np.copy(xu_r)
+        xu_r_perturbed[i] += h
+        Jacobian[:, i] = (f(xu_r_perturbed) - f_r) / h
 
     #### YOUR CODE HERE ####
 
@@ -183,8 +184,28 @@ def optimize_single_action(goal_state, current_state, reference_control, A, B, s
     
     #define the control constraints and the objective, then use cvxpy to solve the QP
     ### YOUR CODE HERE ###
+     # Define the objective
+    predicted_state = current_state + B @ control
+    objective = cvx.Minimize(cvx.norm(predicted_state - goal_state, 2)**2)
 
+    # Define the constraints
+    constraints = [
+        control[ControlIndices.SPEED] >= speed_limit[0],
+        control[ControlIndices.SPEED] <= speed_limit[1],
+        control[ControlIndices.TURN] >= turn_limit[0],
+        control[ControlIndices.TURN] <= turn_limit[1]
+    ]
 
+    # Solve the QP
+    prob = cvx.Problem(objective, constraints)
+    prob.solve()
+
+    # Debugging print statements
+    '''
+    print("Control:", control.value)
+    if prob.status != cvx.OPTIMAL:
+        print("Optimization problem:", prob.status)
+    '''
 
     ### YOUR CODE HERE ###
 
