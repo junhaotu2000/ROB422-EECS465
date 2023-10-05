@@ -18,18 +18,18 @@ def sgd(x0, maxi, grad_f, t, iteration_limit):
     - iteration_limit: the max number of iterations
     
     Returns:
-    - history: list of x values from each iteration
+    - value: list of x values from each iteration
     """
     x = x0
-    history = [x]
+    value = [x]
 
     for _ in range(iteration_limit):
         i = random.randint(0, maxi-1)
         delta_xi = -grad_f(x, i)
 
         x = x + t * delta_xi
-        history.append(x)
-    return history
+        value.append(x)
+    return value
 
 
 

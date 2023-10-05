@@ -14,9 +14,9 @@ def newton_method(f, x, grad_f, hessian_f):
     - hessian_f: second derivative of the function
     
     Returns:
-    - history: list of x values from each iteration
+    - value: list of x values from each iteration
     """
-    history = [x]
+    value = [x]
 
     while True:
         delta_x = -grad_f(x)/hessian_f(x)
@@ -26,6 +26,6 @@ def newton_method(f, x, grad_f, hessian_f):
         
         t = bls(f, x, grad_f, delta_x)
         x = x + t * delta_x
-        history.append(x)
+        value.append(x)
 
-    return history
+    return value

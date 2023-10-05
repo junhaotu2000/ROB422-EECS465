@@ -17,11 +17,11 @@ def hess_f(x):
 
 # Determine data points for each method and given function
 x0 = 5
-gd_history_x = grad_descent(f, x0, grad_f)
-gd_history_y = f(np.transpose(gd_history_x))
+gd_value_x = grad_descent(f, x0, grad_f)
+gd_value_y = f(np.transpose(gd_value_x))
 
-nm_history_x = newton_method(f, x0, grad_f, hess_f)
-nm_history_y = f(np.transpose(nm_history_x))
+nm_value_x = newton_method(f, x0, grad_f, hess_f)
+nm_value_y = f(np.transpose(nm_value_x))
 
 x_vals = np.linspace(-10, 10, 400)
 y_vals = f(x_vals)
@@ -30,16 +30,16 @@ plt.figure(figsize=(10, 5))
 # Plot 1: Objective function and sequences
 plt.subplot(1, 2, 1)
 plt.plot(x_vals, y_vals, 'k', label="Objective Function")
-plt.plot(gd_history_x, gd_history_y, 'r*-', label="Gradient Descent")
-plt.plot(nm_history_x, nm_history_y, 'm*-', label="Newton's Method")
+plt.plot(gd_value_x, gd_value_y, 'r*-', label="Gradient Descent")
+plt.plot(nm_value_x, nm_value_y, 'm*-', label="Newton's Method")
 plt.xlabel('x')
 plt.ylabel('f(x)')
 plt.legend()
 
 # Plot 2: f(x(i)) vs i
 plt.subplot(1, 2, 2)
-plt.plot(gd_history_y, 'r', label="Gradient Descent")
-plt.plot(nm_history_y, 'm', label="Newton's Method")
+plt.plot(gd_value_y, 'r', label="Gradient Descent")
+plt.plot(nm_value_y, 'm', label="Newton's Method")
 plt.xlabel('Iteration i')
 plt.ylabel('f(x(i))')
 plt.legend()

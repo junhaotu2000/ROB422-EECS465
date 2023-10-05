@@ -25,12 +25,12 @@ def fsum(x):
        sum = sum + fi(x,i)
     return sum
 
-sgd_history_x = sgd(-5, maxi, fiprime, 1, 1000)
-sgd_history_y = [fsum(x) for x in sgd_history_x]
+sgd_value_x = sgd(-5, maxi, fiprime, 1, 1000)
+sgd_value_y = [fsum(x) for x in sgd_value_x]
 
 plt.close('all')
 plt.figure(figsize=(7, 5))
-plt.plot(range(len(sgd_history_x)), sgd_history_y, 'k-', label="fsum(x(i)) vs i")
+plt.plot(range(len(sgd_value_x)), sgd_value_y, 'k-', label="fsum(x(i)) vs i")
 plt.xlabel('Iteration i')
 plt.ylabel('fsum(x(i))')
 plt.legend()

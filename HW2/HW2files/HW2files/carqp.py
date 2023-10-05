@@ -1,3 +1,6 @@
+#---------------------------------------------------
+# carqp --- Junhao TU/10.4#
+#---------------------------------------------------
 import matplotlib.pyplot as plt
 import numpy as np
 import cvxpy as cvx
@@ -57,10 +60,6 @@ class CarEnvironment:
         plt.show()
         self.state_history = []
 
-
-     
-
-         
 
     def visualize_state(self, state, name='current', color=(0, 0, 0), plot_trail=True):
         """Draw a state"""
