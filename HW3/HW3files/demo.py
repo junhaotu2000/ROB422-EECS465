@@ -1,6 +1,7 @@
 import numpy as np
 from utils import load_env, get_collision_fn_PR2, execute_trajectory, draw_sphere_marker, draw_line
 from pybullet_tools.utils import connect, disconnect, wait_if_gui, wait_for_user, joint_from_name, get_joint_info, get_link_pose, link_from_name
+import os
 
 joint_names =('l_shoulder_pan_joint','l_shoulder_lift_joint','l_elbow_flex_joint','l_upper_arm_roll_joint','l_forearm_roll_joint','l_wrist_flex_joint')
 
@@ -8,7 +9,13 @@ def main(screenshot=False):
     # initialize PyBullet
     connect(use_gui=True)
     # load robot and obstacle resources
-    robots, obstacles = load_env('pr2table.json')
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, 'pr2table.json')
+    #robots, obstacles = load_env('pr2table.json')
+
+    robots, obstacles = load_env(file_path)
+
     # get the index for PR2
     PR2 = robots['pr2']
 
