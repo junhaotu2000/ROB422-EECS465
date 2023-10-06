@@ -1,6 +1,4 @@
-# ROB422 - UM Robotics
-## Introduction to Algorithmic Robotics
-
+# ROB422 -  Introduction to Algorithmic Robotics
 Welcome to the Robotics course instructed by the UM Robotics professor, Dmitry. While this course might seem like a mere "Introduction" at first glance, it delves much deeper, offering valuable life lessons alongside technical skills.
 
 ## Course Content
