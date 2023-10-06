@@ -6,15 +6,15 @@ import numpy as np
 
 #this function plots the hyperplanes
 def DrawHyperplanes(hyperplanes):
-    linescale = 2;
-    plt.figure(1);
-    numplanes = hyperplanes.shape[0];
-    x0 = np.mat(np.zeros((2,numplanes)));
+    linescale = 2
+    plt.figure(1)
+    numplanes = hyperplanes.shape[0]
+    x0 = np.mat(np.zeros((2,numplanes)))
     for i in range(0,numplanes):
-        a = hyperplanes[i][:,0:2].T;
-        b = hyperplanes[i,2];
-        x0[:,i] = (np.linalg.pinv(a)*b).T; #basically the same as x0[:,i] = inv(a'*a)*a'*b;
-        plt.plot([x0[0,i]],[x0[1,i]],'bo');
+        a = hyperplanes[i][:,0:2].T
+        b = hyperplanes[i,2]
+        x0[:,i] = (np.linalg.pinv(a)*b).T #basically the same as x0[:,i] = inv(a'*a)*a'*b
+        plt.plot([x0[0,i]],[x0[1,i]],'bo')
         #plt.plot([x0[0,i], (x0[0,i]+a[0])],[x0[1,i], (x0[1,i]+a[1])],'b') #arrow without a tip
         plt.arrow(x0[0,i], x0[1,i], a[0,0], a[1,0], head_width=0.05, head_length=0.1, fc='b', ec='b') #arrow with tip
         plt.plot([x0[0,i], (x0[0,i]-linescale*a[1,0])],[x0[1,i],(x0[1,i]+linescale*a[0,0])],'r')
@@ -26,51 +26,51 @@ def DrawHyperplanes(hyperplanes):
 #this is the main function where this script begins to execute
 if __name__ == "__main__":
     #define parameters to be used in the solver
-    t = 0.1; #this is the "force" with which the optimization function "pulls" on the current point
-    mu = 1.5; #this is how much to scale t at each outerloop iteration
-    epsilon = 0.001; #this is the desired precision of the outer loop
-    newton_epsilon = 0.001; #this is the desired precision of Newton's method (inner loop)
-    alpha = 0.1; #for back-tracking line search
-    beta = 0.6; #for back-tracking line search
+    t = 0.1 #this is the "force" with which the optimization function "pulls" on the current point
+    mu = 1.5 #this is how much to scale t at each outerloop iteration
+    epsilon = 0.001 #this is the desired precision of the outer loop
+    newton_epsilon = 0.001 #this is the desired precision of Newton's method (inner loop)
+    alpha = 0.1 #for back-tracking line search
+    beta = 0.6 #for back-tracking line search
 
     #these are defined as [a b]
     hyperplanes = np.mat([[0.7071,    0.7071, 1.5], 
                     [-0.7071,    0.7071, 1.5],
                     [0.7071,    -0.7071, 1],
-                    [-0.7071,    -0.7071, 1]]);
+                    [-0.7071,    -0.7071, 1]])
 
 
     #number of hyperplanes in this problem
-    numplanes = hyperplanes.shape[0];
+    numplanes = hyperplanes.shape[0]
 
     #the optimization function c:
-    c = np.mat([2, 1]).T;
+    c = np.mat([2, 1]).T
 
     #pick a starting point (this can be done autonomously but we'll do it by hand)
-    x = np.mat([0, 0]).T;
+    x = np.mat([0, 0]).T
 
     #now draw the constraining hyperplanes
-    DrawHyperplanes(hyperplanes);
+    DrawHyperplanes(hyperplanes)
 
     #let's break down the data into variables we are familiar with
-    a = hyperplanes[:][:,0:2].T; # each column is the "a" part of a hyperplane
-    b = hyperplanes[:,2]; # each row is the "b" part of a hyperplane (only one element in each row)
+    a = hyperplanes[:][:,0:2].T # each column is the "a" part of a hyperplane
+    b = hyperplanes[:,2] # each row is the "b" part of a hyperplane (only one element in each row)
 
     #plot the starting point
-    plt.plot(x[0,0],x[1,0], 'gx');
+    plt.plot(x[0,0],x[1,0], 'gx')
 
-    num_outer_iterations = 0;
-    num_inner_iterations = 0;
+    num_outer_iterations = 0
+    num_inner_iterations = 0
     
 
     ###############Start outer loop (Barrier Method)#####################
     while 1:
-        num_outer_iterations = num_outer_iterations + 1;
+        num_outer_iterations = num_outer_iterations + 1
 
         ###############Start inner loop (Newton's Method)#####################
-        num_inner_iterations = 0;
+        num_inner_iterations = 0
         while 1:
-            num_inner_iterations = num_inner_iterations + 1;
+            num_inner_iterations = num_inner_iterations + 1
 
             #now start computing f' (fprime), which is the sum of the optimization force 
             #and the forces pushing away from the barriers
@@ -87,8 +87,8 @@ if __name__ == "__main__":
                 fprime_for_plane_j = a[:, j] / (-a[:, j].T * x + b[j, 0])
                 fprimeprime_for_plane_j = a[:, j] * a[:, j].T / ((-a[:, j].T * x + b[j, 0]) ** 2)
 
-                fprime = fprime + fprime_for_plane_j; # put in the contribution of hyperplane j to fprime
-                fprimeprime = fprimeprime + fprimeprime_for_plane_j; # put in the contribution of hyperplane j to fprimeprime
+                fprime = fprime + fprime_for_plane_j # put in the contribution of hyperplane j to fprime
+                fprimeprime = fprimeprime + fprimeprime_for_plane_j # put in the contribution of hyperplane j to fprimeprime
 
             #you might want to print fprime and fprimeprime here to debug (but it will slow things down)
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             #check if we've reached the Newton's method stopping condition
             #if so, break out of Newton's method
             if lambda2 / 2 <= newton_epsilon:
-                break;
+                break
     
             #now we have a direction to move the point x (i.e. the Newton step) but we don't 
             #know how far to move in that direction
@@ -111,38 +111,38 @@ if __name__ == "__main__":
 
             #back-tracking line search
 
-            k = 1; #this is how much to scale the step, start with the original magnitude
-            f = t*c.T*x;
+            k = 1 #this is how much to scale the step, start with the original magnitude
+            f = t*c.T*x
             for j in range(0,numplanes):
                  f = f - np.log(-a[:, j].T * x + b[j, 0])
 
             while 1:
-                xnew = x + k*step;
-                fnew = t*c.T*xnew;
-                pastboundary = 0;
+                xnew = x + k*step
+                fnew = t*c.T*xnew
+                pastboundary = 0
                 #check if we've jumped over a boundary
                 for j in range(0,numplanes):
-                    dist = -a[:,j].T*xnew + b[j,0];
+                    dist = -a[:,j].T*xnew + b[j,0]
                     if (dist < 0):
-                        pastboundary = 1;
-                        break;
-                    fnew = fnew - np.log(dist);
+                        pastboundary = 1
+                        break
+                    fnew = fnew - np.log(dist)
 
                 #use alpha and beta to generate new guess for how much to move along the step direction
                 if pastboundary or fnew> f+ alpha * k * fprime.T * step:
                     #if we're not done
                     k = beta * k
                 else:
-                    break;
+                    break
             
             #now we have k, the amount to scale the step
-            x = x + k*step;
+            x = x + k*step
             #plot the new point for this Newton iteration in green
-            plt.plot(x[0,0],x[1,0], 'gx');
+            plt.plot(x[0,0],x[1,0], 'gx')
 
         ###############End inner loop (Newton's Method)#####################
         #plot the new point for this outer loop iteration in red
-        plt.plot(x[0,0],x[1,0], 'rx');
+        plt.plot(x[0,0],x[1,0], 'rx')
 
         print('OUTER loop iteration %d: Number of INNER loop iterations: %d\n'%(num_outer_iterations, num_inner_iterations))
 
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 
         #If the duality gap is below our error tolerance (epsilon), we're done!
         if duality_gap < epsilon:
-            break;
+            break
     
         #now that we've figured out the optimal point for this amount of optimization "force," increase the optimization force to a larger value
         #compute the new optimization force magnitude

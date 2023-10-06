@@ -18,10 +18,10 @@ def hess_f(x):
 # Determine data points for each method and given function
 x0 = 5
 gd_value_x = grad_descent(f, x0, grad_f)
-gd_value_y = f(np.transpose(gd_value_x))
+gd_value_y = f(np.array(gd_value_x))
 
 nm_value_x = newton_method(f, x0, grad_f, hess_f)
-nm_value_y = f(np.transpose(nm_value_x))
+nm_value_y = f(np.array(nm_value_x))
 
 x_vals = np.linspace(-10, 10, 400)
 y_vals = f(x_vals)
