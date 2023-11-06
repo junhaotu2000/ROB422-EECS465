@@ -13,40 +13,37 @@ class Node():
         self.theta = theta_in
         self.parent = parent
         self.gn = gn
-    
+
     def config(self):
         return (self.x, self.y, self.theta)
+    
+def distance(n, m):
+    return np.sqrt((n.x - m.x)**2 + (n.y - m.y)**2 + min(abs(n.theta - m.theta), 2*np.pi - abs(n.theta - m.theta))**2)
 
 def action_cost(n, m):
-    cost_action = np.sqrt((n.x - m.x)**2 + (n.y - m.y)**2 + min(abs(n.theta - m.theta), 2*np.pi - abs(n.theta - m.theta))**2)
-    return cost_action
+    return distance(n, m)
 
 def heuristic(n, goal):
-    result_heuristic = np.sqrt((n.x - goal.x)**2 + (n.y - goal.y)**2 + min(abs(n.theta - goal.theta), 2*np.pi - abs(n.theta - goal.theta))**2)
-    return result_heuristic
+    return distance(n, goal)
 
 def boundingangle(theta):
-    if theta > np.pi:
-        theta = theta - 2 * np.pi
-    elif theta < -np.pi:
-        theta = theta + 2 * np.pi
-    return theta
+    return (theta + np.pi) % (2 * np.pi) - np.pi
 
 def neighbor_connected(node, mode):
     neighbor = []
     if mode == '4-connected':
-      if mode == '4-connected':
-         for dx, dy, dtheta in [[-0.1, 0, 0],
-                 [0.2, 0, 0],
-                 [0, 0.1, 0],
-                 [0, -0.1, 0],
+        #set the step to be 0.5 instead of 1 so that it will not cross over the obstacle
+        for dx, dy, dtheta in [[-0.15, 0, 0],
+                 [0.3, 0, 0],
+                 [0, 0.3, 0],
+                 [0, -0.3, 0],
                  [0, 0, -np.pi/2],
                  [0, 0, np.pi/2]]:
             neighbor_node = Node(node.x + dx, node.y + dy, boundingangle(node.theta + dtheta), node, -1)
             neighbor.append(neighbor_node)
     
     elif mode == '8-connected':
-      for dx in [-0.1, 0, 0.1]:
+        for dx in [-0.1, 0, 0.1]:
             for dy in [-0.1, 0, 0.1]:
                 for dtheta in [-np.pi/2, 0, np.pi/2]:
                     if not(dx == 0 and dy == 0 and dtheta == 0):
@@ -54,6 +51,51 @@ def neighbor_connected(node, mode):
                         neighbor.append(neighbor_node)
 
     return neighbor
+    
+def astar(start_config, goal_config, collision_fn, mode):
+    #defind several states
+    start_node = Node(start_config[0], start_config[1], start_config[2], None, 0)
+    goal_node = Node(goal_config[0], goal_config[1], goal_config[2], None, -1) #-1 for arbitary choice
+
+    #define the openset and closed set to restore states
+    open_set = PriorityQueue()
+    #(priority, node). For initial starting point, the priority (fn) is hn
+    h_start = heuristic(start_node, goal_node)
+    #add second one if the first priority is same
+    open_set.put((h_start, 0, start_node))
+
+    explored_config = []
+    count = 1 #for second priority
+
+    while not open_set.empty():
+        current = open_set.get()
+        priority = current[0]
+        current_node = current[2]
+
+        #first, put the current node into the explored set
+        if current_node.config() not in explored_config:
+            explored_config.append(current_node.config())
+        else:
+            continue
+
+        if collision_fn(current_node.config()):
+            continue
+
+        #if the current node is the goal node
+        if is_close_enough(current_node, goal_node):
+            #trace back the route from start to goal, like map
+            path = pathtrace(current_node)
+            return path, explored_config
+            break
+        
+        neighbors = neighbor_connected(current_node, mode)
+        for neighbor in neighbors:
+            if neighbor.config() not in explored_config:
+                neighbor.gn = current_node.gn + action_cost(current_node, neighbor)
+                neighbor_fn_cost = neighbor.gn + heuristic(neighbor, goal_node)
+                open_set.put((neighbor_fn_cost, count, neighbor))
+                count += 1
+
 
 def pathtrace(node):
     path = []
@@ -73,54 +115,6 @@ def is_close_enough(node1, node2):
     if abs(node1.theta - node2.theta) > epsilon:
         return False
     return True
-
-def astar_research_algorithm(start_config, goal_config, collision_fn, mode, visualize=False):
-    start_node = Node(start_config[0], start_config[1], start_config[2], None, 0)
-    goal_node = Node(goal_config[0], goal_config[1], goal_config[2], None, -1)
-
-    open_set = PriorityQueue()
-    h_start = heuristic(start_node, goal_node)
-    open_set.put((h_start, 0, start_node))
-
-    explored_config = []
-    count = 1
-
-    while not open_set.empty():
-        current = open_set.get()
-        current_node = current[2]
-
-        if current_node.config() not in explored_config:
-            explored_config.append(current_node.config())
-        else:
-            continue
-
-        if visualize:
-            if collision_fn(current_node.config()):  
-                draw_sphere_marker((current_node.x, current_node.y, 0.1), 0.05, (1, 0, 0, 1))  # In collision (red)
-            else:
-                draw_sphere_marker((current_node.x, current_node.y, 0.1), 0.05, (0, 0, 1, 1))  # Collision-free (blue)
-
-        if collision_fn(current_node.config()):
-            continue
-
-        if is_close_enough(current_node, goal_node):
-            path = pathtrace(current_node)
-            # Draw the final path in black when the goal is reached
-            if visualize:
-                for config in path:
-                    draw_sphere_marker((config[0], config[1], 0.1), 0.07, (0, 0, 0, 1))
-            return path, explored_config
-        
-        neighbors = neighbor_connected(current_node, mode)
-        for neighbor in neighbors:
-            if neighbor.config() not in explored_config:
-                neighbor.gn = current_node.gn + action_cost(current_node, neighbor)
-                neighbor_fn_cost = neighbor.gn + heuristic(neighbor, goal_node)
-                open_set.put((neighbor_fn_cost, count, neighbor))
-                count += 1
-
-    return [], explored_config  # Return empty path if goal is not reached
-
 
 #########################
 
@@ -151,13 +145,28 @@ def main(screenshot=False):
     ### YOUR CODE HERE ###
     
     for mode in ['8-connected']:
-        print(f"\nRunning A* algorithm based on {mode} neighbors: ")
+       
+        path, explored_config = astar(start_config, goal_config, collision_fn, mode)
+        
+        if path:
+            print(f"\nRunning A* algorithm based on {mode} neightbors: ")
+            path_cost = sum(action_cost(Node(*path[i], -1, -1), Node(*path[i+1], -1, -1)) for i in range(len(path) - 1))
+            print("Path cost for ", mode, ": ", path_cost)
+        else: 
+            print("No Solution Found.")
+            
+        # Draw path in black
+        for config in path:
+            draw_sphere_marker((config[0], config[1], 0.1), 0.07, (0, 0, 0, 1))
 
-        # The 'visualize=True' argument ensures visualizations during the search.
-        path = astar_research_algorithm(start_config, goal_config, collision_fn, mode, visualize=True)
-        path_cost = sum(action_cost(Node(*path[i], -1, -1), Node(*path[i+1], -1, -1)) for i in range(len(path) - 1))
-        print("Path cost for ", mode, ": ", path_cost)
-
+        # Draw explored configurations
+        for draw_config in explored_config:
+            # In collision (red)
+            if collision_fn(draw_config):  
+                draw_sphere_marker((draw_config[0], draw_config[1], 0.1), 0.05, (1, 0, 0, 1))
+            else:  # Collision-free (blue)
+                draw_sphere_marker((draw_config[0], draw_config[1], 0.1), 0.05, (0, 0, 1, 1))
+    
     ######################
     print("Planner run time: ", time.time() - start_time)
     # Execute planned path
