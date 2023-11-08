@@ -54,7 +54,28 @@ def calculate_friction_cone(contact_force_vector, tangent_dir, mu, num_cone_vect
     cone_edges = None
     _, contact_unit_normal, f_0_pre_rotation = get_f0_pre_rotation(contact_force_vector, mu)
     ### YOUR CODE HERE ###
+    # determine f0
+    beta = np.arctan(mu) 
+    rotation_about_tangent = Rotation.from_rotvec(beta * tangent_dir)
+    f0 = rotation_about_tangent.apply(f_0_pre_rotation)
 
+    # calculate evenly spaced angles for the full set of friction cone vectors
+    angles = (2 * np.pi * np.arange(num_cone_vectors)) / num_cone_vectors
+
+    # initialize the array of cone vectors
+    cone_edges = np.zeros((num_cone_vectors, 3))
+
+    # create and apply the rotations to f_0_pre_rotation to generate the friction cone
+    for i in range(num_cone_vectors):
+        # Angle for current vector
+        angle = angles[i]
+        # Vector to rotate around is the contact normal (z-axis of cone)
+        rotation_vector = angle * contact_unit_normal
+        # Define the rotation
+        rotation = Rotation.from_rotvec(rotation_vector)
+        # Apply the rotation to the initial friction cone vector (f_0_pre_rotation)
+        cone_edges[i, :] = rotation.apply(f0)
+        
     ######################
 
     return cone_edges
@@ -80,7 +101,14 @@ def compare_discretization(contact_point, world):
     eight_vector_volume = None
 
     ### YOUR CODE HERE ###
-
+    
+    cone_height = np.linalg.norm(contact_force_vector)
+    cone_radius = mu * cone_height
+    
+    true_volume = 1/3 * np.pi * cone_radius**2 * cone_height
+    four_vector_volume = 2/3 * cone_radius**2 * cone_height
+    eight_vector_volume = (2 * np.sqrt(2))/3 * cone_radius**2 * cone_height
+    
     ######################
 
     print('True volume:', np.round(true_volume, 4) if true_volume is not None else 'Not implemented')
@@ -106,7 +134,22 @@ def convex_hull(wrenches):
     max_radius = 0.0
 
     ### YOUR CODE HERE ###
-
+    hull = ConvexHull(wrenches, qhull_options = 'QJ')
+    # print("hull equation:", hull.equations)
+    
+    force_closure_bool = all(np.dot(eq[:-1],[0,0,0,0,0,0]) +eq[-1] <=0 for eq in hull.equations)
+    
+    if force_closure_bool:
+        max_radius = np.inf
+        for eq in hull.equations:
+            normal = eq[:-1]
+            offset = eq[-1]
+            
+            distance = np.abs(offset) / np.linalg.norm(normal)
+            
+            if distance < max_radius:
+                max_radius = distance
+    
     ######################
 
     if hull is None:
