@@ -80,20 +80,9 @@ def main():
     pc_source = utils.load_pc('cloud_icp_source.csv')
 
     ###YOUR CODE HERE###
-    target = 3
+    target = 1
     pc_target = utils.load_pc(f'cloud_icp_target{target}.csv')
     
-    ### icp algorithms 
-    MAX_ITERATION = 50
-    epsilons = [0.061, 0.04, 0.06, 1.49]
-    pc_source, pc_target, it, errors = icp(pc_source, pc_target, epsilons[target], MAX_ITERATION)
-    
-    # plot our list in X,Y coordinates
-    plt.figure(2)   
-    plt.plot(it, errors, color = 'g')
-    plt.xlabel('iteration')
-    plt.ylabel('error')
-    plt.title("Error vs. Iteration of ICP") 
     
     ###YOUR CODE HERE###
     utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
