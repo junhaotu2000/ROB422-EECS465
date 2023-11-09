@@ -146,45 +146,53 @@ def main():
     ### YOUR CODE HERE ###
     q_current = q_arr
     x_target = np.array(targets[test_idx])
-    
     threshold = 0.001
     step_size = 0.002
-     
     
-    while True:
-        # Get the current end-effector position from the forward kinematics
-        x_current = get_ee_transform(robot, joint_idx)[:3, 3]
-        x_change = x_target - x_current
-            
-        # Check if the current end-effector position is close enough to the target
-        if np.linalg.norm(x_change) < threshold:
-            break
-            
-        # Compute the change in joint positions using the pseudoinverse Jacobian
-        J = get_translation_jacobian(robot, joint_idx)
-        J_pinv = get_jacobian_pinv(J)
-        q_change = J_pinv @ x_change.reshape((3,1))
-         
-        # If the change is too large, scale it down to the step size   
-        if np.linalg.norm(q_change) > step_size:
-            q_change = step_size * (q_change / np.linalg.norm(q_change))
-            
-        # Update joint variables
-        q_current += q_change.T
-            
-        # Check joint limits
-        for idx, joint_id in enumerate(joint_idx):
-            joint_info = get_joint_info(robot, joint_id)
-            lower_limit, upper_limit = joint_info.jointLowerLimit, joint_info.jointUpperLimit
-            
-            # Check lower limit
-            if q_current[0, idx] < lower_limit:
-                q_current[0, idx] = lower_limit
-            # Check upper limit
-            elif q_current[0, idx] > upper_limit:
-                q_current[0, idx] = upper_limit
+    # Parameters for null-space control
+    beta = 0.001  # Tune this parameter to balance primary and secondary tasks
 
-        # Set joint variables on robot
+    # Calculate the midpoint of each joint range for the repelling task
+    mid_points = np.array([(joint_limits[jn][0] + joint_limits[jn][1]) / 2.0 for jn in joint_names])
+
+    while True:
+        # Compute the current end-effector position
+        x_current = get_ee_transform(robot, joint_idx)[:3, 3]
+        x_error = x_target - x_current
+
+        # Check if the current end-effector position is close enough to the target
+        if np.linalg.norm(x_error) < threshold:
+            break
+
+        # Compute the Jacobian for the current joint configuration
+        J = get_translation_jacobian(robot, joint_idx)
+
+        # Compute the damped pseudo-inverse of the Jacobian
+        J_pinv = get_jacobian_pinv(J)
+
+        # Compute the primary task in joint space
+        q_dot_primary = J_pinv @ x_error.reshape((3, 1))
+
+        # Compute the secondary task for joint limit avoidance
+        q_tilde = q_current - mid_points.reshape(1, len(joint_names))
+        q_dot_secondary = -beta * q_tilde
+
+        # Compute the null space projector
+        N = np.eye(len(joint_idx)) - J_pinv @ J
+
+        # Project the secondary task into the null space of the Jacobian
+        q_dot_null_space = N @ q_dot_secondary.T
+
+        # Combine the primary and secondary tasks
+        q_dot_total = q_dot_primary + q_dot_null_space.reshape((len(joint_idx), 1))
+
+        # Update the joint positions
+        q_current += q_dot_total.T * step_size
+
+        # Ensure the joint positions are within limits
+        q_current = np.clip(q_current, [joint_limits[jn][0] for jn in joint_names], [joint_limits[jn][1] for jn in joint_names])
+
+        # Update the robot's joint positions
         set_joint_positions_np(robot, joint_idx, q_current)
             
     print(f"Reach target point {test_idx} ")
