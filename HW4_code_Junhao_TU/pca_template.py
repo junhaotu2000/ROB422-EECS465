@@ -52,7 +52,6 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(pc_rotated[:, 0], pc_rotated[:, 1], pc_rotated[:, 2])
     plt.title("Point Cloud Aligned with XY Plane")
-    print(f"The transpose of Vs matrix is: \n{vt.T}")
 
     # Part b: Remove noise and rotate to 2D using Vs
     pc_filtered_rotated = mean_centered_data.dot(vs.T)
@@ -60,7 +59,6 @@ def main():
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(pc_filtered_rotated[:, 0], pc_filtered_rotated[:, 1])
     plt.title("Filtered and Aligned Point Cloud")
-    print(f"The transpose of Vs matrix is: \n{vs.T}")
 
     # Part c: Fit a plane and draw it
     # The plane is spanned by the first two principal components (largest eigenvalues)  
@@ -69,16 +67,11 @@ def main():
     # Fit a plane
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    xlim = ax.get_xlim()
-    ylim = ax.get_ylim()
-    X, Y = np.meshgrid(np.linspace(min(pc_array[:, 0]), max(pc_array[:, 0]), 50),
-                       np.linspace(min(pc_array[:, 1]), max(pc_array[:, 1]), 50))
-    Z = (-normal[0] * X - normal[1] * Y - d) / normal[2]
-    ax.plot_surface(X, Y, Z, color='g', alpha=0.5)
+    xx, yy = np.meshgrid(range(-10, 10), range(-10, 10))
+    zz = (-normal[0] * xx - normal[1] * yy - d) * 1. / normal[2]
+    ax.plot_surface(xx, yy, zz, alpha=0.5, rstride=100, cstride=100, color='g', zorder=0)
     ax.scatter(pc_array[:, 0], pc_array[:, 1], pc_array[:, 2], color='b', zorder=10)
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
+    plt.title("Point Cloud with Fitted Plane")
     
     ###YOUR CODE HERE###
 

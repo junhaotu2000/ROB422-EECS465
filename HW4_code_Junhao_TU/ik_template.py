@@ -147,9 +147,10 @@ def main():
     q_current = q_arr
     x_target = np.array(targets[test_idx])
     
-    threshold = 0.01
+    threshold = 0.001
     step_size = 0.002
      
+    
     while True:
         # Get the current end-effector position from the forward kinematics
         x_current = get_ee_transform(robot, joint_idx)[:3, 3]

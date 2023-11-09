@@ -146,7 +146,7 @@ def main():
     ### YOUR CODE HERE ###
     q_current = q_arr
     x_target = np.array(targets[test_idx])
-    threshold = 0.001
+    threshold = 0.01
     step_size = 0.002
     
     # Parameters for null-space control
