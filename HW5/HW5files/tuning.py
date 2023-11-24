@@ -25,11 +25,11 @@ if __name__ == '__main__':
         x_tminus1 = np.matrix(ground_truth_states[:,i-1]).transpose()
         u_t = np.matrix(actions[:,i]).transpose()
         z_t = np.matrix(noisy_measurement[:,i]).transpose()
-        ###YOUR CODE HERE###
+        ###YOUR CODE HERE###[0,0]
         #use the above variables, as well as A,B, and C (loaded above)...
-        #to compute the motion and sensor error
-        motion_errors[:,i] = [0,0] #change this
-        sensor_errors[:,i] = [0,0] #change this
+        #to compute the motion and sensor error(x_t - A@x_tminus1 - B@u_t).transpose
+        motion_errors[:,i] = np.transpose(x_t - A @ x_tminus1 - B @ u_t) #change this
+        sensor_errors[:,i] = np.transpose(z_t - C @ x_t)#change thismotion_errors
         ###YOUR CODE HERE###
     
     motion_cov=np.cov(motion_errors)

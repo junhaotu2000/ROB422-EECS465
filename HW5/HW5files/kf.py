@@ -23,13 +23,15 @@ def KalmanFilter(mu, Sigma, z, u, A, B, C, Q, R):
     ###YOUR CODE HERE###
 
     #prediction step    
-    
-
+    mu_pre = A @ mu + B @ u
+    Sigma_pre = A @ Sigma @ A.T + R
+        
     #correction step
-
-
-
-    mu_new = mu; Sigma_new = Sigma #comment this out to use your code
+    K_gain = Sigma_pre @ C.T @ np.linalg.inv(C @ Sigma_pre @ C.T + Q)
+    mu_new = mu_pre + K_gain @ (z - C @ mu_pre)
+    Sigma_new = (np.eye(2) - K_gain @ C) @ Sigma_pre
+    
+    #mu_new = mu; Sigma_new = Sigma #comment this out to use your code
     ###YOUR CODE HERE###
     return mu_new, Sigma_new
 
@@ -40,7 +42,7 @@ def main():
     plot_axes = plt.subplot(111, aspect='equal')   
 
     #load in the data
-    PIK = "kfdata.dat"
+    PIK = "/home/aaron/ROB422/ROB422/HW5/HW5files/kfdata.dat"
     with open(PIK, "rb") as f:
         noisy_measurement,actions,ground_truth_states,N = pickle.load(f)
 
