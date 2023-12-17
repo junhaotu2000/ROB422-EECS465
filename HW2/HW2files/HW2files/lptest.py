@@ -29,5 +29,5 @@ def solve_lp_with_cvxpy():
     # Print the result
     print("The optimal point:", x.value)
 
-if __name__ == "__main__":
+if __name__ == "__main__": #用于测试
     solve_lp_with_cvxpy()

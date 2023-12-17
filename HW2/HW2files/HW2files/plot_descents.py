@@ -22,6 +22,10 @@ gd_value_y = f(np.array(gd_value_x))
 
 nm_value_x = newton_method(f, x0, grad_f, hess_f)
 nm_value_y = f(np.array(nm_value_x))
+# numpy函数通常期望接收numpy数组作为输入，而不是Python原生的list。
+# 这是因为numpy函数是为数组操作优化的，它们可以利用numpy的内部优化来对数组进行高效的元素级操作。
+
+
 
 x_vals = np.linspace(-10, 10, 400)
 y_vals = f(x_vals)
