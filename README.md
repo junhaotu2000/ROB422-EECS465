@@ -11,5 +11,5 @@ This primer on Robotics canvases a wide spectrum of the discipline:
 
 🔗 **Course Details**: [Click Here](https://berenson.robotics.umich.edu/courses/fall2023iar/index.html) for full course information and materials.
 
-🔗 **Final Project**: [Click Here](https://berenson.robotics.umich.edu/courses/fall2023iar/index.html](https://github.com/junhaotu2000/ROB422-EECS465/tree/main/Final%20Project)https://github.com/junhaotu2000/ROB422-EECS465/tree/main/Final%20Project) Kalman and Particle Filters Localization.
+🔗 **Final Project**: [Click Here](https://github.com/junhaotu2000/ROB422-EECS465/tree/main/Final%20Project) Kalman and Particle Filters Localization.
 
